@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+
+<html lang="ar">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>تطبيق السوبر ماركت</title>
+
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            margin: 0;
+
+            padding: 0;
+
+            direction: rtl;
+
+        }
+
+        header {
+
+            background-color: #4CAF50;
+
+            color: white;
+
+            padding: 10px;
+
+            text-align: center;
+
+        }
+
+        .container {
+
+            padding: 20px;
+
+        }
+
+        .search-bar {
+
+            margin: 20px auto;
+
+            text-align: center;
+
+            position: relative;
+
+        }
+
+        #suggestion-box {
+
+            display: none;
+
+            border: 1px solid #ccc;
+
+            position: absolute;
+
+            background-color: white;
+
+            width: calc(100% - 20px);
+
+            z-index: 1000;
+
+        }
+
+        .product-list {
+
+            margin-top: 20px;
+
+        }
+
+        .checkout-icon {
+
+            font-size: 20px; /* حجم أصغر للأيقونة */
+
+            cursor: pointer;
+
+            transition: transform 0.3s;
+
+            display: block;
+
+            position: fixed; /* وضع الأيقونة في الزاوية */
+
+            bottom: 20px;
+
+            right: 20px;
+
+            background-color: #4CAF50;
+
+            color: white;
+
+            padding: 10px;
+
+            border-radius: 50%;
+
+        }
+
+        .checkout-icon:hover {
+
+            transform: scale(1.1);
+
+        }
+
+        .message {
+
+            display: none;
+
+            margin-top: 20px;
+
+            text-align: center;
+
+        }
+
+        .location-input {
+
+            display: none;
+
+            margin-top: 20px;
+
+            text-align: center;
+
+        }
+
+        .currency-conversion {
+
+            margin-top: 20px;
+
+            text-align: center;
+
+        }
+
+        .admin-section {
+
+            margin-top: 20px;
+
+            text-align: center;
+
+        }
+
+        .add-product, .manage-products {
+
+            display: none; /* مخفي بشكل افتراضي */
+
+        }
+
+        .product-item {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin: 10px 0;
+
+        }
+
+        .product-item button {
+
+            margin-left: 5px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>مرحبًا بكم في متجر هاشم الحسين</h1>
+
+</header>
+
+<div class="container">
+
+    <h3>البحث عن المنتجات</h3>
+
+    <div class="search-bar">
+
+        <input type="text" id="search-name" placeholder="ابحث عن منتج بالاسم" oninput="autocomplete(this.value)" />
+
+        <div id="suggestion-box"></div>
+
+    </div>
+
+    <div class="product-list" id="product-list"></div>
+
+    <div class="checkout-section">
+
+        <span class="checkout-icon" onclick="completeCheckout()">🛒</span>
+
+    </div>
+
+    <div class="message" id="completion-message">
+
+        <p>تم الإتمام! حدد موقعك:</p>
+
+        <button onclick="getLocation()">تحديد الموقع تلقائيًا</button>
+
+        <div class="location-input">
+
+            <input type="text" id="manual-location" placeholder="أدخل موقعك يدويًا هنا" />
+
+            <button onclick="submitLocation()">إرسال</button>
+
+        </div>
+
+    </div>
+
+    <div class="currency-conversion">
+
+        <h4>تحويل العملة</h4>
+
+        <label for="dollar-amount">المبلغ بالدولار:</label>
+
+        <input type="number" id="dollar-amount" placeholder="أدخل المبلغ" />
+
+        <button onclick="convertCurrency()">تحويل</button>
+
+        <p id="conversion-result"></p>
+
+    </div>
+
+    <div class="admin-section">
+
+        <h4>إدارة المنتجات (للمالك فقط)</h4>
+
+        <input type="password" id="admin-password" placeholder="أدخل الرمز السري" />
+
+        <button onclick="checkAdmin()">دخول</button>
+
+        <div class="add-product" id="add-product">
+
+            <h5>إضافة منتج جديد</h5>
+
+            <input type="text" id="new-product-name" placeholder="اسم المنتج" />
+
+            <select id="product-category">
+
+                <option value="حلويات">حلويات</option>
+
+                <option value="مشروبات">مشروبات</option>
+
+                <option value="منظفات">منظفات</option>
+
+                <option value="غذائيات">غذائيات</option>
+
+            </select>
+
+            <button onclick="addProduct()">إضافة</button>
+
+        </div>
+
+        <div class="manage-products" id="manage-products">
+
+            <h5>تعديل وحذف المنتجات</h5>
+
+            <div id="existing-products-list"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const products = [
+
+        { id: 1, name: 'شوكولاتة', category: 'حلويات' },
+
+        { id: 2, name: 'عصير برتقال', category: 'مشروبات' },
+
+        { id: 3, name: 'ماء معدني', category: 'مشروبات' },
+
+        { id: 4, name: 'كعكة فانيليا', category: 'حلويات' },
+
+        { id: 5, name: 'منظف سائل', category: 'منظفات' },
+
+        // أضف المزيد من المنتجات هنا
+
+    ];
+
+    const exchangeRate = 9000; // سعر صرف الدولار إلى الليرة السورية (يمكنك تعديله حسب السعر المحلي الحالي)
+
+    function autocomplete(input) {
+
+        const suggestions = products.filter(product => 
+
+            product.name.includes(input)
+
+        );
+
+        // عرض الاقتراحات
+
+        const suggestionBox = document.getElementById('suggestion-box');
+
+        suggestionBox.innerHTML = suggestions.map(s => `<div>${s.name}</div>`).join('');
+
+        suggestionBox.style.display = suggestions.length ? 'block' : 'none';
+
+    }
+
+    function completeCheckout() {
+
+        const message = document.getElementById('completion-message');
+
+        message.style.display = 'block';
+
+        const locationInput = document.querySelector('.location-input');
+
+        locationInput.style.display = 'block';
+
+    }
+
+    function getLocation() {
+
+        // هنا يمكنك إضافة الكود لتحديد الموقع تلقائيًا
+
+        console.log("تحديد الموقع تلقائيًا...");
+
+        alert("تم تحديد الموقع تلقائيًا!");
+
+    }
+
+    function submitLocation() {
+
+        const location = document.getElementById('manual-location').value;
+
+        alert(`تم إرسال الموقع: ${location}`);
+
+    }
+
+    function convertCurrency() {
+
+        const dollarAmount = document.getElementById('dollar-amount').value;
+
+        const conversionResult = dollarAmount * exchangeRate;
+
+        document.getElementById('conversion-result').innerText = `المبلغ بالليرة السورية: ${conversionResult}`;
+
+    }
+
+    function checkAdmin() {
+
+        const password = document.getElementById('admin-password').value;
+
+        if (password === 'Asdf123456') {
+
+            document.getElementById('add-product').style.display = 'block';
+
+            document.getElementById('manage-products').style.display = 'block'; // إظهار قسم إدارة المنتجات
+
+            displayProducts(); // عرض المنتجات الموجودة بعد دخول المالك
+
+        } else {
+
+            alert('كلمة المرور غير صحيحة!');
+
+        }
+
+    }
+
+    function addProduct() {
+
+        const productName = document.getElementById('new-product-name').value;
+
+        const productCategory = document.getElementById('product-category').value;
+
+        if (productName) {
+
+            const newProduct = { id: products.length + 1, name: productName, category: productCategory };
+
+            products.push(newProduct);
+
+            alert(`تم إضافة المنتج: ${productName}`);
+
+            document.getElementById('new-product-name').value = ''; // إعادة تعيين حقل الاسم
+
+            displayProducts(); // تحديث قائمة المنتجات
+
+        } else {
+
+            alert('يرجى إدخال اسم المنتج.');
+
+        }
+
+    }
+
+    function displayProducts() {
+
+        const productList = document.getElementById('existing-products-list');
+
+        productList.innerHTML = '';
+
+        products.forEach(product => {
+
+            productList.innerHTML += `
+
+                <div class="product-item">
+
+                    <span>${product.name} (${product.category})</span>
+
+                    <button onclick="editProduct(${product.id})">تعديل</button>
+
+                    <button onclick="deleteProduct(${product.id})">حذف</button>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    function editProduct(id) {
+
+        const product = products.find(p => p.id === id);
+
+        const newName = prompt("أدخل اسم المنتج الجديد:", product.name);
+
+        const newCategory = prompt("أدخل فئة المنتج الجديدة:", product.category);
+
+        
+
+        if (newName && newCategory) {
+
+            product.name = newName;
+
+            product.category = newCategory;
+
+            alert(`تم تعديل المنتج: ${newName}`);
+
+            displayProducts(); // تحديث قائمة المنتجات
+
+        } else {
+
+            alert('يرجى إدخال اسم وفئة صحيحة.');
+
+        }
+
+    }
+
+    function deleteProduct(id) {
+
+        const productIndex = products.findIndex(p => p.id === id);
+
+        if (productIndex > -1) {
+
+            products.splice(productIndex, 1);
+
+            alert('تم حذف المنتج بنجاح.');
+
+            displayProducts(); // تحديث قائمة المنتجات
+
+        }
+
+    }
+
+</script>
+
+</body>
+
+</html>
+<!-- partial -->
+  
+</body>
+</html>
