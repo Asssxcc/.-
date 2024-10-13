@@ -86,7 +86,7 @@
 
         .checkout-icon {
 
-            font-size: 20px; /* حجم أصغر للأيقونة */
+            font-size: 20px;
 
             cursor: pointer;
 
@@ -94,7 +94,7 @@
 
             display: block;
 
-            position: fixed; /* وضع الأيقونة في الزاوية */
+            position: fixed;
 
             bottom: 20px;
 
@@ -136,11 +136,33 @@
 
         }
 
-        .currency-conversion {
+        .cart-icon {
 
-            margin-top: 20px;
+            position: fixed;
 
-            text-align: center;
+            top: 20px;
+
+            right: 20px;
+
+            font-size: 24px;
+
+            background-color: #f39c12;
+
+            color: white;
+
+            padding: 10px;
+
+            border-radius: 50%;
+
+            animation: bounce 1s infinite;
+
+        }
+
+        @keyframes bounce {
+
+            0%, 100% { transform: translateY(0); }
+
+            50% { transform: translateY(-10px); }
 
         }
 
@@ -154,7 +176,7 @@
 
         .add-product, .manage-products {
 
-            display: none; /* مخفي بشكل افتراضي */
+            display: none;
 
         }
 
@@ -167,6 +189,16 @@
             align-items: center;
 
             margin: 10px 0;
+
+        }
+
+        .product-item img {
+
+            width: 50px;
+
+            height: 50px;
+
+            margin-left: 10px;
 
         }
 
@@ -208,6 +240,12 @@
 
     </div>
 
+    <div class="cart-icon" id="cart-icon" onclick="showCart()">
+
+        <span id="cart-count">0</span>
+
+    </div>
+
     <div class="message" id="completion-message">
 
         <p>تم الإتمام! حدد موقعك:</p>
@@ -221,20 +259,6 @@
             <button onclick="submitLocation()">إرسال</button>
 
         </div>
-
-    </div>
-
-    <div class="currency-conversion">
-
-        <h4>تحويل العملة</h4>
-
-        <label for="dollar-amount">المبلغ بالدولار:</label>
-
-        <input type="number" id="dollar-amount" placeholder="أدخل المبلغ" />
-
-        <button onclick="convertCurrency()">تحويل</button>
-
-        <p id="conversion-result"></p>
 
     </div>
 
@@ -264,6 +288,8 @@
 
             </select>
 
+            <input type="text" id="product-image" placeholder="رابط صورة المنتج" />
+
             <button onclick="addProduct()">إضافة</button>
 
         </div>
@@ -284,21 +310,21 @@
 
     const products = [
 
-        { id: 1, name: 'شوكولاتة', category: 'حلويات' },
+        { id: 1, name: 'شوكولاتة', category: 'حلويات', image: 'https://example.com/chocolate.jpg' },
 
-        { id: 2, name: 'عصير برتقال', category: 'مشروبات' },
+        { id: 2, name: 'عصير برتقال', category: 'مشروبات', image: 'https://example.com/orange-juice.jpg' },
 
-        { id: 3, name: 'ماء معدني', category: 'مشروبات' },
+        { id: 3, name: 'ماء معدني', category: 'مشروبات', image: 'https://example.com/mineral-water.jpg' },
 
-        { id: 4, name: 'كعكة فانيليا', category: 'حلويات' },
+        { id: 4, name: 'كعكة فانيليا', category: 'حلويات', image: 'https://example.com/vanilla-cake.jpg' },
 
-        { id: 5, name: 'منظف سائل', category: 'منظفات' },
+        { id: 5, name: 'منظف سائل', category: 'منظفات', image: 'https://example.com/liquid-cleaner.jpg' },
 
-        // أضف المزيد من المنتجات هنا
+        { id: 6, name: 'سكر', category: 'غذائيات', image: 'https://example.com/sugar.jpg' },
 
     ];
 
-    const exchangeRate = 9000; // سعر صرف الدولار إلى الليرة السورية (يمكنك تعديله حسب السعر المحلي الحالي)
+    let selectedProducts = [];
 
     function autocomplete(input) {
 
@@ -308,8 +334,6 @@
 
         );
 
-        // عرض الاقتراحات
-
         const suggestionBox = document.getElementById('suggestion-box');
 
         suggestionBox.innerHTML = suggestions.map(s => `<div>${s.name}</div>`).join('');
@@ -318,7 +342,33 @@
 
     }
 
+    function addProductToCart(product) {
+
+        if (!selectedProducts.includes(product.id)) {
+
+            selectedProducts.push(product.id);
+
+            updateCartCount();
+
+        }
+
+    }
+
+    function updateCartCount() {
+
+        document.getElementById('cart-count').innerText = selectedProducts.length;
+
+    }
+
     function completeCheckout() {
+
+        if (selectedProducts.length === 0) {
+
+            alert("أهلاً بك! لا يمكن إكمال الطلب، الرجاء اختيار منتج أولاً.");
+
+            return;
+
+        }
 
         const message = document.getElementById('completion-message');
 
@@ -332,10 +382,6 @@
 
     function getLocation() {
 
-        // هنا يمكنك إضافة الكود لتحديد الموقع تلقائيًا
-
-        console.log("تحديد الموقع تلقائيًا...");
-
         alert("تم تحديد الموقع تلقائيًا!");
 
     }
@@ -348,16 +394,6 @@
 
     }
 
-    function convertCurrency() {
-
-        const dollarAmount = document.getElementById('dollar-amount').value;
-
-        const conversionResult = dollarAmount * exchangeRate;
-
-        document.getElementById('conversion-result').innerText = `المبلغ بالليرة السورية: ${conversionResult}`;
-
-    }
-
     function checkAdmin() {
 
         const password = document.getElementById('admin-password').value;
@@ -366,9 +402,9 @@
 
             document.getElementById('add-product').style.display = 'block';
 
-            document.getElementById('manage-products').style.display = 'block'; // إظهار قسم إدارة المنتجات
+            document.getElementById('manage-products').style.display = 'block'; 
 
-            displayProducts(); // عرض المنتجات الموجودة بعد دخول المالك
+            displayProducts(products); 
 
         } else {
 
@@ -378,45 +414,23 @@
 
     }
 
-    function addProduct() {
+    function displayProducts(productsToDisplay) {
 
-        const productName = document.getElementById('new-product-name').value;
-
-        const productCategory = document.getElementById('product-category').value;
-
-        if (productName) {
-
-            const newProduct = { id: products.length + 1, name: productName, category: productCategory };
-
-            products.push(newProduct);
-
-            alert(`تم إضافة المنتج: ${productName}`);
-
-            document.getElementById('new-product-name').value = ''; // إعادة تعيين حقل الاسم
-
-            displayProducts(); // تحديث قائمة المنتجات
-
-        } else {
-
-            alert('يرجى إدخال اسم المنتج.');
-
-        }
-
-    }
-
-    function displayProducts() {
-
-        const productList = document.getElementById('existing-products-list');
+        const productList = document.getElementById('product-list');
 
         productList.innerHTML = '';
 
-        products.forEach(product => {
+        productsToDisplay.forEach(product => {
 
             productList.innerHTML += `
 
                 <div class="product-item">
 
+                    <img src="${product.image}" alt="${product.name}" />
+
                     <span>${product.name} (${product.category})</span>
+
+                    <button onclick="addProductToCart(${JSON.stringify(product)})">إضافة إلى السلة</button>
 
                     <button onclick="editProduct(${product.id})">تعديل</button>
 
@@ -430,6 +444,46 @@
 
     }
 
+    function addProduct() {
+
+        const productName = document.getElementById('new-product-name').value;
+
+        const productCategory = document.getElementById('product-category').value;
+
+        const productImage = document.getElementById('product-image').value;
+
+        if (productName) {
+
+            const existingProduct = products.find(p => p.name === productName);
+
+            if (existingProduct) {
+
+                alert('هذا المنتج موجود بالفعل!');
+
+                return;
+
+            }
+
+            const newProduct = { id: products.length + 1, name: productName, category: productCategory, image: productImage };
+
+            products.push(newProduct);
+
+            alert(`تم إضافة المنتج: ${productName}`);
+
+            document.getElementById('new-product-name').value = ''; 
+
+            document.getElementById('product-image').value = ''; 
+
+            displayProducts(products); 
+
+        } else {
+
+            alert('يرجى إدخال اسم المنتج.');
+
+        }
+
+    }
+
     function editProduct(id) {
 
         const product = products.find(p => p.id === id);
@@ -438,21 +492,25 @@
 
         const newCategory = prompt("أدخل فئة المنتج الجديدة:", product.category);
 
+        const newImage = prompt("أدخل رابط الصورة الجديدة:", product.image);
+
         
 
-        if (newName && newCategory) {
+        if (newName && newCategory && newImage) {
 
             product.name = newName;
 
             product.category = newCategory;
 
+            product.image = newImage;
+
             alert(`تم تعديل المنتج: ${newName}`);
 
-            displayProducts(); // تحديث قائمة المنتجات
+            displayProducts(products); 
 
         } else {
 
-            alert('يرجى إدخال اسم وفئة صحيحة.');
+            alert('يرجى إدخال اسم وفئة وصورة صحيحة.');
 
         }
 
@@ -468,17 +526,25 @@
 
             alert('تم حذف المنتج بنجاح.');
 
-            displayProducts(); // تحديث قائمة المنتجات
+            displayProducts(products); 
 
         }
 
     }
 
+    // عرض جميع المنتجات عند تحميل الصفحة
+
+    window.onload = () => {
+
+        displayProducts(products);
+
+    };
+
 </script>
 
 </body>
 
-</html>
+</html>اضهر الكود
 <!-- partial -->
   
 </body>
