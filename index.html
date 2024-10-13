@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
 
 <html lang="ar">
 
@@ -60,7 +70,7 @@
 
             border-radius: 5px;
 
-            font-size: 0.8em; /* حجم الخط أصغر */
+            font-size: 0.8em;
 
         }
 
@@ -110,9 +120,7 @@
 
         .admin-section {
 
-            margin-top: 20px;
-
-            display: none; /* إخفاء قسم الإدارة بشكل افتراضي */
+            display: none; 
 
         }
 
@@ -130,6 +138,66 @@
 
         }
 
+        .total-price {
+
+            background: red;
+
+            color: white;
+
+            padding: 5px 10px;
+
+            border-radius: 5px;
+
+            font-size: 0.8em;
+
+            margin-left: 10px;
+
+        }
+
+        .currency-section {
+
+            margin-top: 20px;
+
+        }
+
+        .currency-icon {
+
+            cursor: pointer;
+
+            background-color: #007bff;
+
+            color: white;
+
+            padding: 10px;
+
+            border-radius: 5px;
+
+            display: inline-block;
+
+            margin: 10px 0;
+
+            font-size: 0.8em;
+
+        }
+
+        .cart-container {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        .image-preview {
+
+            max-width: 100px;
+
+            max-height: 100px;
+
+            margin-top: 10px;
+
+        }
+
     </style>
 
 </head>
@@ -138,21 +206,21 @@
 
 <header>
 
-    <h1>مرحبًا بك في متجر هاشم الحسين</h1>
+    <h1>مرحبًا بك في متجر هاشم الحسيني</h1>
 
     <p>موقعنا: دير الزور، غرانيج</p>
 
 </header>
 
-<div class="category-icons">
+<div class="cart-container">
 
-    <div class="category-icon" onclick="showProducts('حلويات')">🥮 حلويات</div>
+    <div class="total-price" id="totalPrice">
 
-    <div class="category-icon" onclick="showProducts('منظفات')">🧴 منظفات</div>
+        مجموع الأسعار: 0 دولار
 
-    <div class="category-icon" onclick="showProducts('غذائيات')">🥗 غذائيات</div>
+    </div>
 
-    <div class="category-icon" onclick="showProducts('عصائر')">🍹 عصائر</div>
+    <button class="button" onclick="showCart()">🛒 سلة التسوق</button>
 
 </div>
 
@@ -166,39 +234,53 @@
 
     <h2>جميع المنتجات</h2>
 
-    <!-- المنتجات ستظهر هنا -->
-
-</div>
-
-<div class="cart">
-
-    <h2>السلة</h2>
-
-    <div id="cartItems"></div>
-
-    <button class="button" onclick="completeOrder()">إنهاء التسوق</button>
-
-    <div id="alert" class="alert"></div>
-
 </div>
 
 <div class="admin-section" id="admin-section">
 
     <h2>إدارة المنتجات</h2>
 
+    <button class="button" onclick="logout()">خروج</button>
+
     <input type="text" id="newProductName" placeholder="اسم المنتج" />
 
     <input type="number" id="newProductPrice" placeholder="سعر المنتج" />
 
-    <input type="text" id="newProductImage" placeholder="رابط صورة المنتج" />
+    <input type="file" id="newProductImage" accept="image/*" onchange="previewImage(event)" />
 
-    <input type="text" id="newProductCategory" placeholder="فئة المنتج (حلويات، منظفات، غذائيات، عصائر)" />
+    <img id="imagePreview" class="image-preview" style="display: none;" />
+
+    <input type="text" id="newProductCategory" placeholder="فئة المنتج" />
 
     <button class="button" onclick="addProduct()">إضافة منتج</button>
 
+    <button class="button" onclick="changeWhatsAppNumber()">تغيير رقم الواتس</button>
+
 </div>
 
-<!-- نموذج إدخال رمز الدخول -->
+<div class="category-icons">
+
+    <div class="category-icon" onclick="showProducts('حلويات')">🥮 حلويات</div>
+
+    <div class="category-icon" onclick="showProducts('منظفات')">🧴 منظفات</div>
+
+    <div class="category-icon" onclick="showProducts('غذائيات')">🥗 غذائيات</div>
+
+    <div class="category-icon" onclick="showProducts('عصائر')">🍹 عصائر</div>
+
+    <div class="currency-icon" onclick="toggleCurrencyConverter()">💱 تحويل العملة</div>
+
+</div>
+
+<div class="currency-section" id="currency-section" style="display: none;">
+
+    <h2>تحديث سعر الصرف</h2>
+
+    <input type="number" id="exchangeRate" placeholder="سعر الصرف (دولار إلى ليرة سورية)" />
+
+    <button class="button" onclick="updateExchangeRate()">تحديث سعر الصرف</button>
+
+</div>
 
 <div style="text-align: center; margin-top: 20px;">
 
@@ -208,15 +290,35 @@
 
 </div>
 
+<div class="category-icons" style="justify-content: center; margin-top: 20px;">
+
+    <div class="category-icon" onclick="requestAdminCode()">🔐 إدارة المنتجات</div>
+
+</div>
+
 <footer>
 
     <p>معلومات المتجر</p>
 
-    <p>العاملون: أبو عبد الرحمن، أبو علي، أبو أسماء، أبو شهد</p>
+    <p>المعلمون: أبو عبد الرحمن، أبو علي، أبو أسماء، أبو شهد</p>
 
-    <p>للتواصل: <a href="mailto:balbd2086@gmail.com" style="color: white;">balbd2086@gmail.com</a></p>
+    <p>للتواصل: <a href="https://wa.me/963960947867" style="color: white;">واتساب: +963 960 947 867</a></p>
 
 </footer>
+
+<div id="cartPage" style="display: none;">
+
+    <h2>منتجات السلة</h2>
+
+    <div id="cartItems"></div>
+
+    <button class="button" onclick="completeOrder()">إنهاء التسوق</button>
+
+    <button class="button" onclick="goBack()">العودة</button>
+
+    <div id="alert" class="alert"></div>
+
+</div>
 
 <script>
 
@@ -224,19 +326,99 @@
 
     let cart = [];
 
-    function checkAdminCode() {
+    let exchangeRate = 0;
 
-        const code = document.getElementById('adminCode').value;
+    let adminPassword = 'Asdf123456';
 
-        if (code === 'Asdf123456') {
+    let whatsappNumber = '+963 960 947 867';
 
-            document.getElementById('admin-section').style.display = 'block'; // عرض قسم الإدارة
+    function requestAdminCode() {
 
-            alert('تم الدخول إلى قسم الإدارة.');
+        const code = prompt("أدخل رمز الإدارة:");
+
+        if (code === adminPassword) {
+
+            document.getElementById('admin-section').style.display = 'block';
+
+            document.getElementById('currency-section').style.display = 'block';
 
         } else {
 
             alert('رمز الإدارة غير صحيح.');
+
+        }
+
+    }
+
+    function logout() {
+
+        document.getElementById('admin-section').style.display = 'none';
+
+        alert('تم تسجيل الخروج من قسم الإدارة.');
+
+    }
+
+    function changeWhatsAppNumber() {
+
+        const newNumber = prompt("أدخل رقم الواتس الجديد:");
+
+        if (newNumber) {
+
+            whatsappNumber = newNumber;
+
+            alert('تم تغيير رقم الواتس بنجاح.');
+
+        }
+
+    }
+
+    function updateExchangeRate() {
+
+        const rate = parseFloat(document.getElementById('exchangeRate').value);
+
+        if (!rate) {
+
+            alert('يرجى إدخال سعر صرف صحيح.');
+
+            return;
+
+        }
+
+        exchangeRate = rate;
+
+        document.getElementById('exchangeRate').value = '';
+
+        alert('تم تحديث سعر الصرف إلى ' + exchangeRate + ' ليرة سورية لكل دولار.');
+
+    }
+
+    function toggleCurrencyConverter() {
+
+        const currentRate = exchangeRate ? exchangeRate : "لم يتم تعيين سعر الصرف";
+
+        alert(`سعر الصرف الحالي: 1 دولار = ${currentRate} ليرة سورية`);
+
+    }
+
+    function previewImage(event) {
+
+        const imagePreview = document.getElementById('imagePreview');
+
+        const file = event.target.files[0];
+
+        if (file) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                imagePreview.src = e.target.result;
+
+                imagePreview.style.display = 'block';
+
+            }
+
+            reader.readAsDataURL(file);
 
         }
 
@@ -248,7 +430,7 @@
 
         const price = parseFloat(document.getElementById('newProductPrice').value);
 
-        const image = document.getElementById('newProductImage').value;
+        const image = document.getElementById('imagePreview').src;
 
         const category = document.getElementById('newProductCategory').value;
 
@@ -272,6 +454,8 @@
 
         document.getElementById('newProductCategory').value = '';
 
+        document.getElementById('imagePreview').style.display = 'none';
+
         renderProducts(products);
 
     }
@@ -291,6 +475,8 @@
                     <h3>${product.name}</h3>
 
                     <p>سعر: ${product.price} دولار</p>
+
+                    <p>سعر: ${(product.price * exchangeRate).toFixed(2)} ليرة سورية</p>
 
                     <img src="${product.image}" alt="${product.name}" style="width: 100px; height: 100px;"/>
 
@@ -328,29 +514,59 @@
 
     function addToCart(productName, price) {
 
-        cart.push({ productName, price });
+        const existingItem = cart.find(item => item.productName === productName);
 
-        renderCart();
+        if (existingItem) {
+
+            existingItem.quantity++;
+
+        } else {
+
+            cart.push({ productName, price, quantity: 1 });
+
+        }
+
+        updateTotalPrice();
 
     }
 
     function renderCart() {
 
-        const cartItems = document.getElementById('cartItems');
+        const cartItemsElement = document.getElementById('cartItems');
 
-        cartItems.innerHTML = '';
+        cartItemsElement.innerHTML = '';
 
         cart.forEach(item => {
 
-            cartItems.innerHTML += `<div class="cart-item">${item.productName} - ${item.price} دولار</div>`;
+            cartItemsElement.innerHTML += `
+
+                <div class="cart-item">
+
+                    ${item.productName} - ${item.price} دولار
+
+                    <span>عدد القطع: <button onclick="decreaseQuantity('${item.productName}')">-</button> ${item.quantity} <button onclick="increaseQuantity('${item.productName}')">+</button></span>
+
+                    <button class="button" onclick="removeFromCart('${item.productName}')">إزالة</button>
+
+                </div>
+
+            `;
 
         });
 
     }
 
+    function updateTotalPrice() {
+
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        document.getElementById('totalPrice').innerText = `مجموع الأسعار: ${total} دولار`;
+
+    }
+
     function completeOrder() {
 
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
         if (total < 50) {
 
@@ -362,11 +578,83 @@
 
         document.getElementById('alert').innerText = '';
 
-        alert('نجح الطلب! سيتم إرسال الطلب إلى البريد الإلكتروني: balbd2086@gmail.com');
+        const location = prompt("أدخل موقعك:");
+
+        const message = `طلب جديد من الزبون:\n\nالمنتجات:\n${cart.map(item => `${item.productName} - ${item.quantity} قطعة`).join('\n')}\n\nالمجموع: ${total} دولار\n\nالموقع: ${location}`;
+
+        const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+        
+
+        window.open(whatsappLink, '_blank');
 
         cart = [];
 
         renderCart();
+
+        updateTotalPrice();
+
+        goBack();
+
+    }
+
+    function increaseQuantity(productName) {
+
+        const item = cart.find(i => i.productName === productName);
+
+        if (item) {
+
+            item.quantity++;
+
+            renderCart();
+
+            updateTotalPrice();
+
+        }
+
+    }
+
+    function decreaseQuantity(productName) {
+
+        const item = cart.find(i => i.productName === productName);
+
+        if (item && item.quantity > 1) {
+
+            item.quantity--;
+
+            renderCart();
+
+            updateTotalPrice();
+
+        }
+
+    }
+
+    function removeFromCart(productName) {
+
+        cart = cart.filter(item => item.productName !== productName);
+
+        renderCart();
+
+        updateTotalPrice();
+
+    }
+
+    function showCart() {
+
+        document.getElementById('product-list').style.display = 'none';
+
+        document.getElementById('cartPage').style.display = 'block';
+
+        renderCart();
+
+    }
+
+    function goBack() {
+
+        document.getElementById('cartPage').style.display = 'none';
+
+        document.getElementById('product-list').style.display = 'block';
 
     }
 
@@ -380,15 +668,11 @@
 
             const newPrice = prompt("أدخل السعر الجديد:", product.price);
 
-            const newImage = prompt("أدخل رابط الصورة الجديدة:", product.image);
-
             const newCategory = prompt("أدخل الفئة الجديدة:", product.category);
 
             if (newName) product.name = newName;
 
             if (newPrice) product.price = parseFloat(newPrice);
-
-            if (newImage) product.image = newImage;
 
             if (newCategory) product.category = newCategory;
 
@@ -406,8 +690,6 @@
 
     }
 
-    // عرض جميع المنتجات عند تحميل الصفحة
-
     window.onload = () => {
 
         renderProducts(products);
@@ -418,4 +700,8 @@
 
 </body>
 
+</html>
+<!-- partial -->
+  
+</body>
 </html>
