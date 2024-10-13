@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق السوبر ماركت</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        header, footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+        .category-icons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .category-icon {
+            margin: 0 5px;
+            cursor: pointer;
+            padding: 5px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.8em;
+        }
+        .product-list, .cart {
+            margin-top: 20px;
+        }
+        .product, .cart-item {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .alert {
+            color: red;
+            margin: 10px 0;
+        }
+        .admin-section {
+            display: none; 
+        }
+        #searchInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .total-price {
+            background: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .currency-section {
+            margin-top: 20px;
+        }
+        .currency-icon {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px 0;
+            font-size: 0.8em;
+        }
+        .cart-container {
+            display: flex;
+            align-items: center;
+        }
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>مرحبًا بك في متجر هاشم الحسيني</h1>
+    <p>موقعنا: دير الزور، غرانيج</p>
+</header>
+
+<div class="cart-container">
+    <div class="total-price" id="totalPrice">
+        مجموع الأسعار: 0 دولار
+    </div>
+    <button class="button" onclick="showCart()">🛒 سلة التسوق</button>
+</div>
+
+<div>
+    <input type="text" id="searchInput" placeholder="ابحث عن منتج..." oninput="searchProducts()"/>
+</div>
+
+<div class="product-list" id="product-list">
+    <h2>جميع المنتجات</h2>
+</div>
+
+<div class="admin-section" id="admin-section">
+    <h2>إدارة المنتجات</h2>
+    <button class="button" onclick="logout()">خروج</button>
+    <input type="text" id="newProductName" placeholder="اسم المنتج" />
+    <input type="number" id="newProductPrice" placeholder="سعر المنتج" />
+    <input type="file" id="newProductImage" accept="image/*" onchange="previewImage(event)" />
+    <img id="imagePreview" class="image-preview" style="display: none;" />
+    <input type="text" id="newProductCategory" placeholder="فئة المنتج" />
+    <button class="button" onclick="addProduct()">إضافة منتج</button>
+    <button class="button" onclick="changeWhatsAppNumber()">تغيير رقم الواتس</button>
+</div>
+
+<div class="category-icons">
+    <div class="category-icon" onclick="showProducts('حلويات')">🥮 حلويات</div>
+    <div class="category-icon" onclick="showProducts('منظفات')">🧴 منظفات</div>
+    <div class="category-icon" onclick="showProducts('غذائيات')">🥗 غذائيات</div>
+    <div class="category-icon" onclick="showProducts('عصائر')">🍹 عصائر</div>
+    <div class="currency-icon" onclick="toggleCurrencyConverter()">💱 تحويل العملة</div>
+</div>
+
+<div class="currency-section" id="currency-section" style="display: none;">
+    <h2>تحديث سعر الصرف</h2>
+    <input type="number" id="exchangeRate" placeholder="سعر الصرف (دولار إلى ليرة سورية)" />
+    <button class="button" onclick="updateExchangeRate()">تحديث سعر الصرف</button>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <input type="password" id="adminCode" placeholder="أدخل رمز الإدارة" />
+    <button class="button" onclick="checkAdminCode()">دخول</button>
+</div>
+
+<div class="category-icons" style="justify-content: center; margin-top: 20px;">
+    <div class="category-icon" onclick="requestAdminCode()">🔐 إدارة المنتجات</div>
+</div>
+
+<footer>
+    <p>معلومات المتجر</p>
+    <p>المعلمون: أبو عبد الرحمن، أبو علي، أبو أسماء، أبو شهد</p>
+    <p>للتواصل: <a href="https://wa.me/963960947867" style="color: white;">واتساب: +963 960 947 867</a></p>
+</footer>
+
+<div id="cartPage" style="display: none;">
+    <h2>منتجات السلة</h2>
+    <div id="cartItems"></div>
+    <button class="button" onclick="completeOrder()">إنهاء التسوق</button>
+    <button class="button" onclick="goBack()">العودة</button>
+    <div id="alert" class="alert"></div>
+</div>
+
+<script>
+    let products = [];
+    let cart = [];
+    let exchangeRate = 0;
+    const adminPassword = 'Asdf123456';
+    let whatsappNumber = '+963 960 947 867';
+
+    function requestAdminCode() {
+        const code = prompt("أدخل رمز الإدارة:");
+        if (code === adminPassword) {
+            document.getElementById('admin-section').style.display = 'block';
+            document.getElementById('currency-section').style.display = 'block';
+        } else {
+            alert('رمز الإدارة غير صحيح.');
+        }
+    }
+
+    function logout() {
+        document.getElementById('admin-section').style.display = 'none';
+        alert('تم تسجيل الخروج من قسم الإدارة.');
+    }
+
+    function changeWhatsAppNumber() {
+        const newNumber = prompt("أدخل رقم الواتس الجديد:");
+        if (newNumber) {
+            whatsappNumber = newNumber;
+            alert('تم تغيير رقم الواتس بنجاح.');
+        }
+    }
+
+    function updateExchangeRate() {
+        const rate = parseFloat(document.getElementById('exchangeRate').value);
+        if (!rate) {
+            alert('يرجى إدخال سعر صرف صحيح.');
+            return;
+        }
+        exchangeRate = rate;
+        document.getElementById('exchangeRate').value = '';
+        alert('تم تحديث سعر الصرف إلى ' + exchangeRate + ' ليرة سورية لكل دولار.');
+    }
+
+    function toggleCurrencyConverter() {
+        const currentRate = exchangeRate ? exchangeRate : "لم يتم تعيين سعر الصرف";
+        alert(`سعر الصرف الحالي: 1 دولار = ${currentRate} ليرة سورية`);
+    }
+
+    function previewImage(event) {
+        const imagePreview = document.getElementById('imagePreview');
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function addProduct() {
+        const name = document.getElementById('newProductName').value;
+        const price = parseFloat(document.getElementById('newProductPrice').value);
+        const image = document.getElementById('imagePreview').src;
+        const category = document.getElementById('newProductCategory').value;
+
+        if (!name || !price || !image || !category) {
+            alert('يرجى ملء جميع الحقول.');
+            return;
+        }
+
+        const product = { id: Date.now(), name, price, image, category };
+        products.push(product);
+        document.getElementById('newProductName').value = '';
+        document.getElementById('newProductPrice').value = '';
+        document.getElementById('newProductImage').value = '';
+        document.getElementById('newProductCategory').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        renderProducts(products);
+    }
+
+    function renderProducts(productList) {
+        const productListElement = document.getElementById('product-list');
+        productListElement.innerHTML = '';
+        productList.forEach(product => {
+            productListElement.innerHTML += `
+                <div class="product">
+                    <h3>${product.name}</h3>
+                    <p>سعر: ${product.price} دولار</p>
+                    <p>سعر: ${(product.price * exchangeRate).toFixed(2)} ليرة سورية</p>
+                    <img src="${product.image}" alt="${product.name}" style="width: 100px; height: 100px;"/>
+                    <button class="button" onclick="addToCart('${product.name}', ${product.price})">إضافة إلى السلة</button>
+                    <button class="button" onclick="editProduct(${product.id})">تعديل</button>
+                    <button class="button" onclick="deleteProduct(${product.id})">حذف</button>
+                </div>
+            `;
+        });
+    }
+
+    function showProducts(category) {
+        const filteredProducts = products.filter(product => product.category === category);
+        renderProducts(filteredProducts);
+    }
+
+    function searchProducts() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filteredProducts = products.filter(product => product.name.toLowerCase().includes(query));
+        renderProducts(filteredProducts);
+    }
+
+    function addToCart(productName, price) {
+        const existingItem = cart.find(item => item.productName === productName);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ productName, price, quantity: 1 });
+        }
+        updateTotalPrice();
+    }
+
+    function renderCart() {
+        const cartItemsElement = document.getElementById('cartItems');
+        cartItemsElement.innerHTML = '';
+        cart.forEach(item => {
+            cartItemsElement.innerHTML += `
+                <div class="cart-item">
+                    ${item.productName} - ${item.price} دولار
+                    <span>عدد القطع: <button onclick="decreaseQuantity('${item.productName}')">-</button> ${item.quantity} <button onclick="increaseQuantity('${item.productName}')">+</button></span>
+                    <button class="button" onclick="removeFromCart('${item.productName}')">إزالة</button>
+                </div>
+            `;
+        });
+    }
+
+    function updateTotalPrice() {
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('totalPrice').innerText = `مجموع الأسعار: ${total} دولار`;
+    }
+
+    function completeOrder() {
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        if (total < 50) {
+            document.getElementById('alert').innerText = 'يجب أن يكون إجمالي الطلب 50 دولار على الأقل.';
+            return;
+        }
+        document.getElementById('alert').innerText = '';
+
+        const location = prompt("أدخل موقعك:");
+        const message = `طلب جديد من الزبون:\n\nالمنتجات:\n${cart.map(item => `${item.productName} - ${item.quantity} قطعة`).join('\n')}\n\nالمجموع: ${total} دولار\n\nالموقع: ${location}`;
+        const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+        
+        window.open(whatsappLink, '_blank');
+        cart = [];
+        renderCart();
+        updateTotalPrice();
+        goBack();
+    }
+
+    function increaseQuantity(productName) {
+        const item = cart.find(i => i.productName === productName);
+        if (item) {
+            item.quantity++;
+            renderCart();
+            updateTotalPrice();
+        }
+    }
+
+    function decreaseQuantity(productName) {
+        const item = cart.find(i => i.productName === productName);
+        if (item && item.quantity > 1) {
+            item.quantity--;
+            renderCart();
+            updateTotalPrice();
+        }
+    }
+
+    function removeFromCart(productName) {
+        cart = cart.filter(item => item.productName !== productName);
+        renderCart();
+        updateTotalPrice();
+    }
+
+    function showCart() {
+        document.getElementById('product-list').style.display = 'none';
+        document.getElementById('cartPage').style.display = 'block';
+        renderCart();
+    }
+
+    function goBack() {
+        document.getElementById('cartPage').style.display = 'none';
+        document.getElementById('product-list').style.display = 'block';
+    }
+
+    function editProduct(id) {
+        const product = products.find(p => p.id === id);
+        if (product) {
+            const newName = prompt("أدخل اسم المنتج الجديد:", product.name);
+            const newPrice = prompt("أدخل السعر الجديد:", product.price);
+            const newCategory = prompt("أدخل الفئة الجديدة:", product.category);
+
+            if (newName) product.name = newName;
+            if (newPrice) product.price = parseFloat(newPrice);
+            if (newCategory) product.category = newCategory;
+
+            renderProducts(products);
+        }
+    }
+
+    function deleteProduct(id) {
+        products = products.filter(product => product.id !== id);
+        renderProducts(products);
+    }
+
+    window.onload = () => {
+        renderProducts(products);
+    };
+</script>
+
+</body>
+</html>
